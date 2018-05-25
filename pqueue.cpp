@@ -173,7 +173,7 @@ void PriorityQueue::decreaseKey(string value, float priority) {
     insert(value,priority);
 }
 
-void PriorityQueue::gimme() {
+void PriorityQueue::print() {
     for(int i = 0; i < _size;i++) {
         if (i <= _last) {
             cout << _entrys[i]->value << " " << _entrys[i]->priority << " " <<_entrys[i] << endl;

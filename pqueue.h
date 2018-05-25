@@ -39,7 +39,7 @@ public:
     void decreaseKey(string value, float priority);
     void remove(string value);
     bool isEmpty(void);
-    void gimme();
+    void print();
 };
 
 #endif //OOA2_PQUEUE_H

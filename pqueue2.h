@@ -41,7 +41,7 @@ public:
     void decreaseKey(T value, float priority);
     void remove(T value);
     bool isEmpty(void);
-    void gimme();
+    void print();
 };
 
 
@@ -210,7 +210,7 @@ void PriorityQueue<T>::decreaseKey(T value, float priority) {
     insert(value,priority);
 }
 template <typename T>
-void PriorityQueue<T>::gimme() {
+void PriorityQueue<T>::print() {
     for(int i = 0; i < _size;i++) {
         if (i <= _last) {
             cout << _entrys[i]->value << " " << _entrys[i]->priority << " " <<_entrys[i] << endl;

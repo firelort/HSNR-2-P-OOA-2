@@ -5,6 +5,7 @@
 //
 #include <iostream>
 #include "pqueue2.h"
+#include <time.h>
 
 using namespace std;
 #define MAX 100000
@@ -91,9 +92,14 @@ int main() {
                 break;
             case 5:
                 try {
-                    pq->isEmpty();
+                    if (pq->isEmpty())
+                        cout << "Das Array ist leer" << endl;
                     pq->insert("Hello World", 100);
-                    pq->isEmpty();
+                    if (pq->isEmpty()) {
+                        cout << "Das Array ist leer." << endl;
+                    } else {
+                        cout << "Das Array ist nicht leer." << endl;
+                    }
 
                 } catch (MyException e) {
                     cout << e.msg() << endl;
