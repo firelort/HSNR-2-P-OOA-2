@@ -1,5 +1,3 @@
-
-
 //
 // Copied from the template and slightly added. Version 1.0
 //
@@ -32,7 +30,7 @@ int main() {
     }
 
 
-    while (j < 200) {
+    while (j < 6) {
         switch (j) {
             case 0: //"Array zu klein"
                 try {
