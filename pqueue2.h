@@ -28,18 +28,18 @@ class PriorityQueue {
 private:
     int _size;
     int _last;
-    PriorityQueueEntry<T> **_entrys;
+    PriorityQueueEntry<T> **_entrys; // Array aus PriorityQueueEntry<T> Pointern
     bool isFull(void);
     bool isAlmostFull(void);
     void changeArray(int Richtung);
-    void privateRemove( int toggle, T value);
+    void privateRemove( int toggle, T value); // Wird von extractMin und remove aufgerufen um sachen zu löschen
 public:
     PriorityQueue(int size = 100);
     ~PriorityQueue(void);
     void insert(T value, float priority);
     T extractMin(void);
     void decreaseKey(T value, float priority);
-    void remove(T value);
+    void remove(T value); // Entscheid nur wo gelöscht werden muss
     bool isEmpty(void);
     void print();
 };
@@ -48,6 +48,7 @@ public:
 MyException::MyException(string error) {
     _error = error;
 }
+
 string MyException::msg() {
     return _error;
 }
@@ -67,16 +68,16 @@ PriorityQueue<T>::PriorityQueue(int size) {
 template <typename T>
 PriorityQueue<T>::~PriorityQueue() {
     for (int i = 0; i < _last ; i++) {
-        delete _entrys[i];
+        delete _entrys[i]; //Erst die Elemente im Array löschen
     }
-    delete[] _entrys;
+    delete[] _entrys; // Array löschen
 }
 
 
 template <typename T>
-void PriorityQueue<T>::changeArray(int richtung) {
+void PriorityQueue<T>::changeArray(int richtung) { //Prüft und verändert die Größe des Arrays(1 => Vergrößerung, -1 => Verkleinerung)
     if (richtung == 1) {
-        if (isFull() || isAlmostFull()) {
+        if (isAlmostFull()) {
             PriorityQueueEntry<T> **newArray = new PriorityQueueEntry<T>*[_size * 2];
             for (int arraysize = 0; arraysize <= _last ; arraysize++) {
                 newArray[arraysize] = _entrys[arraysize];
@@ -96,7 +97,7 @@ void PriorityQueue<T>::changeArray(int richtung) {
             _entrys = newArray;
         }
     } else {
-        throw MyException("Fehler 123");
+        return;
     }
 }
 template <typename T>
@@ -114,27 +115,27 @@ bool PriorityQueue<T>::isEmpty() {
 
 template <typename T>
 void PriorityQueue<T>::insert(T value, float priority) {
-    if (_last == -1) { // ARRAY ist leer
+    changeArray(1);
+    if (_last == -1) { // ARRAY ist leer. Element kann vorne eingefügt werden
         _last += 1;
         _entrys[_last] = new PriorityQueueEntry<T>(priority,value);
     } else {
         int i = 1;
-        changeArray(1);
-        if (priority < _entrys[0]->priority) {
+        if (priority < _entrys[0]->priority) {// An Erste Position einfügen. Restliches Array 1 nach hinten schieben
             for (int arraysize = _last; arraysize >= 0; arraysize--) {
                 _entrys[arraysize + 1] = _entrys[arraysize];
             }
             _entrys[0] = new PriorityQueueEntry<T>(priority, value);
             _last += 1;
-        } else if (priority > _entrys[_last]->priority) {
+        } else if (priority > _entrys[_last]->priority) { // An letzte Position einfügen.
             _last += 1;
             _entrys[_last] = new PriorityQueueEntry<T>(priority, value);
-        } else {
+        } else { // Irgendwo einfügen. Position + restlichen 1 nach hinten schieben.
             while (_entrys[i]->priority < priority) {
                 i++;
             }
             if (priority > _entrys[_last]->priority) {
-                throw MyException("Fehler A");
+                throw MyException("Element konnte nicht eingefügt werden");
             }
             for (int arraysize = _last; arraysize >= i; arraysize--) {
                 _entrys[arraysize + 1] = _entrys[arraysize];
@@ -147,23 +148,23 @@ void PriorityQueue<T>::insert(T value, float priority) {
 template <typename T>
 T PriorityQueue<T>::extractMin() {
     T ret;
-    if(_last == -1) {
+    if(_last == -1) { // ARRAY ist lerr
         throw MyException("Bitte erst das Array mit Inhalt befüllen");
     }
-    ret = _entrys[0]->value;
-    privateRemove(ERSTESELEMENT, "");
+    ret = _entrys[0]->value; //Value zwischen speichern
+    privateRemove(ERSTESELEMENT, ""); // Remove aufrufen um 1. Element zu löschen.
     return ret;
 }
 template <typename T>
 void PriorityQueue<T>::privateRemove(int toggle, T value) {
     if (_last == -1) {
-        throw MyException("Das Element wurde nicht gefunden.");
+        throw MyException("Das Array ist leer.");
     }
     int i = 0;
 
-    switch(toggle) {
+    switch(toggle) { // Aufgabe von remove und extractMin übernehmen
         case ERSTESELEMENT:
-            delete _entrys[0];
+            delete _entrys[0]; // Array nach vorne schieben
             for (int arraysize = 0; arraysize < _last; arraysize++ ) {
                 _entrys[arraysize] = _entrys[arraysize + 1];
             }
@@ -171,7 +172,7 @@ void PriorityQueue<T>::privateRemove(int toggle, T value) {
         case LETZTESELEMENT:
             delete _entrys[_last];
             break;
-        case UNBEKANNTESELEMENT:
+        case UNBEKANNTESELEMENT: //Element suchen und löschen + Array nach vorne verschieben
             i = 0;
             while(_entrys[i]->value != value && i < _last) {
                 i++;
@@ -188,29 +189,26 @@ void PriorityQueue<T>::privateRemove(int toggle, T value) {
             break;
     }
     _last -= 1;
-    changeArray(-1);
+    changeArray(-1); // Prüfen ob Speicher gespart werden kann
 }
 template <typename T>
 void PriorityQueue<T>::remove(T value) {
-    if (_last == -1) {
-        throw MyException("Fehler B");
-    }
     if (_entrys[0]->value == value) {
-        privateRemove(ERSTESELEMENT, "");
+        privateRemove(ERSTESELEMENT, ""); // Erstes Element löschen lassen
     } else if(_entrys[_last]->value == value) {
-        privateRemove(LETZTESELEMENT, "");
+        privateRemove(LETZTESELEMENT, ""); // Letztes Element löschen lassen
     } else {
-        privateRemove(UNBEKANNTESELEMENT, value);
+        privateRemove(UNBEKANNTESELEMENT, value); //Unbekanntes Element in privateRemove löschen lassen
     }
 }
 
 template <typename T>
 void PriorityQueue<T>::decreaseKey(T value, float priority) {
-    remove(value);
-    insert(value,priority);
+    remove(value); // Altes Element löschen
+    insert(value,priority); // Element mit neuer Priorität wieder einfügen
 }
 template <typename T>
-void PriorityQueue<T>::print() {
+void PriorityQueue<T>::print() { // Array ausgabe.
     for(int i = 0; i < _size;i++) {
         if (i <= _last) {
             cout << _entrys[i]->value << " " << _entrys[i]->priority << " " <<_entrys[i] << endl;
